@@ -83,6 +83,12 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
+// 3) fixed conter
+const counterBtn = $('.counter');
+counterBtn.addEventListener('click', (e) => {
+  const span = $('.count', counterBtn);
+  span.textContent = String(parseInt(span.textContent, 10) + 1);
+});
 // 4) Clipboard — virhe: ei permissioiden / https tarkistusta
 $('#copyBtn').addEventListener('click', async () => {
   const text = $('#copyBtn').dataset.text;
