@@ -83,7 +83,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// 3) fixed conter
+// 3) fixed conter area whole button
 const counterBtn = $('.counter');
 counterBtn.addEventListener('click', (e) => {
   const span = $('.count', counterBtn);
