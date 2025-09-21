@@ -53,8 +53,8 @@ form {
 }
 
 .observe-box {
-    margin-top: 60vh;
-    height: 120px;
+    margin-top: 10vh;
+    height: 140px;
     border: 2px dashed #888;
     display: grid;
     place-items: center;
