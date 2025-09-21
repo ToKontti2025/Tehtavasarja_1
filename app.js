@@ -1,21 +1,11 @@
-'use strict';
+import './scripts/theme.js'
 
 // 0) Pieni apu
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-// 1) Teema — virhe: localStorage avain sekoilee, event listener duplikoituu
-const themeBtn = $('#themeToggle');
-const THEME_KEY = 'theme-preference';
-function applyTheme(t) { document.documentElement.setAttribute('data-theme', t); }
-function saveTheme(t) { localStorage.setItem('theme-preference', t); } // BUG: key typo
-function loadTheme() { return localStorage.getItem('theme-preference') || 'light'; }
-function toggleTheme() { const next = (loadTheme() === 'light') ? 'dark' : 'light'; applyTheme(next); saveTheme(next); }
+// "Moved to its own file"  1) Teema — virhe: localStorage avain sekoilee, event listener duplikoituu
 
-// Deleted double listener (BUG: tuplalistener)
-themeBtn.addEventListener('click', toggleTheme);
-
-applyTheme(loadTheme());
 
 // 2) Haku — korjaus: oikea endpoint + AbortController + try/catch + lataustila
 const form = document.getElementById('searchForm');
