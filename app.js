@@ -1,6 +1,7 @@
 import './scripts/theme.js'
 import './scripts/search.js'
 import './scripts/counter.js'
+import './scripts/clipboard.js'
 
 // 0) Pieni apu
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -12,13 +13,7 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 // moved to own file - 4) counter: fix bubbling so whole button works
 
-
-// 4) Clipboard — virhe: ei permissioiden / https tarkistusta
-$('#copyBtn').addEventListener('click', async () => {
-  const text = $('#copyBtn').dataset.text;
-  await navigator.clipboard.writeText(text); // BUG: voi heittää virheen
-  alert('Kopioitu!');
-});
+// "Moved to its own file"  5) clipboard
 
 // 5) IntersectionObserver — virhe: threshold/cleanup puuttuu
 const box = document.querySelector('.observe-box');
