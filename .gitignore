@@ -1,0 +1,10 @@
+# editor settings folders
+.vscode/
+.idea/
+
+# operating system junk files
+.DS_Store
+Thumbs.db
+
+# log files
+*.log
