@@ -1,21 +1,18 @@
 import './scripts/theme.js'
 import './scripts/search.js'
+import './scripts/counter.js'
 
 // 0) Pieni apu
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-// "Moved to its own file"  1) Teema — virhe: localStorage avain sekoilee, event listener duplikoituu
+// moved to own file - 1+2) theme: localstorage key + double listener fix
+
+// moved to own file - 3) search: abortcontroller + try/catch + loading state
+
+// moved to own file - 4) counter: fix bubbling so whole button works
 
 
-// "Moved to its own file" 2) Haku — korjaus: oikea endpoint + AbortController + try/catch + lataustila
-
-// 4) fixed conter area whole button
-const counterBtn = $('.counter');
-counterBtn.addEventListener('click', (e) => {
-  const span = $('.count', counterBtn);
-  span.textContent = String(parseInt(span.textContent, 10) + 1);
-});
 // 4) Clipboard — virhe: ei permissioiden / https tarkistusta
 $('#copyBtn').addEventListener('click', async () => {
   const text = $('#copyBtn').dataset.text;
