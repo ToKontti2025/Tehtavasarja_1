@@ -1,54 +1,69 @@
-// search with abort + errors + status
+// scripts/search.js
+// just functions: fetch + render, no events here
 
-const form = document.getElementById('searchForm')
 const resultsEl = document.getElementById('results')
-const statusEl = document.getElementById('status')
+const statusEl  = document.getElementById('status')
 
-// keep handle to current request so we can cancel it
 let currentCtrl = null
 
-// fetch list and filter by query
-async function searchImages(query) {
+// get list and filter by query
+export async function searchImages(query) {
   // cancel previous request if still running
-  if (currentCtrl) currentCtrl.abort()
+  if (currentCtrl) {
+    currentCtrl.abort()
+  }
   currentCtrl = new AbortController()
 
-  const url = 'https://api.sampleapis.com/coffee/hot' // returns array of {title,image,...}
+  const url = 'https://api.sampleapis.com/coffee/hot'
 
   try {
-    // show loading to user
+    // tell user we are loading
     statusEl.textContent = 'ladataan…'
 
     const res = await fetch(url, { signal: currentCtrl.signal })
-    if (!res.ok) throw new Error(`http ${res.status}`)
+    if (!res.ok) {
+      throw new Error('http ' + res.status)
+    }
 
     const raw = await res.json()
-    const list = Array.isArray(raw) ? raw : []
 
-    // make query lowercase + trim
+    // make sure we have an array
+    let list = []
+    if (Array.isArray(raw)) {
+      list = raw
+    }
+
+    // prepare query (lowercase + trim)
     let q = ''
     if (query) {
       q = query.toLowerCase().trim()
     }
 
+    // filter by title when q given
     let filtered
     if (q) {
-      // if query not empty → filter
       filtered = list.filter(item => {
-        const title = item.title ? item.title.toLowerCase() : ''
+        let title = ''
+        if (item.title) {
+          title = item.title.toLowerCase()
+        }
         return title.includes(q)
       })
     } else {
-      // if query empty → keep whole list
       filtered = list
     }
 
-    statusEl.textContent = `${filtered.length} tulosta`
+    // show count
+    statusEl.textContent = filtered.length + ' tulosta'
 
-    // take first 12 and map to safe object
+    // keep first 12, return safe shape
     return filtered.slice(0, 12).map(item => {
+      let safeTitle = 'nimetön'
+      if (item.title) {
+        safeTitle = item.title
+      }
       return {
-        title: item.title ? item.title : 'nimetön',
+        title: safeTitle,
         url: item.image
       }
     })
@@ -65,36 +80,82 @@ async function searchImages(query) {
   }
 }
 
-
-// render results to list
-function renderResults(items) {
+// render list items with image fallback, timeout + single retry
+export function renderResults(items) {
+  // clear old
   resultsEl.innerHTML = ''
+
   items.forEach(item => {
     const li = document.createElement('li')
     li.className = 'card'
 
-    // if url is missing, show text instead of image
-    if (item.url) {
-      li.innerHTML = `
-        <strong>${item.title}</strong><br>
-        <img alt="" width="160" height="120" src="${item.url}">
-      `
+    // title
+    const strong = document.createElement('strong')
+    if (item.title) {
+      strong.textContent = item.title
     } else {
-      li.innerHTML = `
-        <strong>${item.title}</strong><br>
-        <em>no image</em>
-      `
+      strong.textContent = 'nimetön'
+    }
+    li.appendChild(strong)
+    li.appendChild(document.createElement('br'))
+
+    // image or fallback
+    if (item.url) {
+      const img = new Image()
+      img.width = 160
+      img.height = 120
+
+      if (item.title) {
+        img.alt = item.title
+      } else {
+        img.alt = ''
+      }
+
+      // help perf and hotlinking issues
+      img.loading = 'lazy'
+      img.decoding = 'async'
+      img.referrerPolicy = 'no-referrer'
+
+      // load
+      img.src = item.url
+
+      // if image is slow → retry once with cache buster, else fallback
+      let triedOnce = false
+      const TIMEOUT_MS = 8000
+      let timer = setTimeout(() => {
+        if (!triedOnce) {
+          triedOnce = true
+          // retry with cache-buster
+          const sep = item.url.indexOf('?') >= 0 ? '&' : '?'
+          img.src = item.url + sep + 't=' + Date.now()
+
+          // second timeout → give up to fallback
+          timer = setTimeout(() => {
+            const em = document.createElement('em')
+            em.textContent = 'no image (timeout)'
+            img.replaceWith(em)
+          }, TIMEOUT_MS)
+        }
+      }, TIMEOUT_MS)
+
+      img.onload = () => {
+        clearTimeout(timer)
+      }
+
+      img.onerror = () => {
+        clearTimeout(timer)
+        const em = document.createElement('em')
+        em.textContent = 'no image'
+        img.replaceWith(em)
+      }
+
+      li.appendChild(img)
+    } else {
+      const em = document.createElement('em')
+      em.textContent = 'no image'
+      li.appendChild(em)
     }
 
     resultsEl.appendChild(li)
   })
 }
-
-// on submit: clear old, run search once, show status from searchImages
-form.addEventListener('submit', async (e) => {
-  e.preventDefault()
-  resultsEl.innerHTML = '' // clear old results
-  const q = document.getElementById('q').value.trim()
-  const items = await searchImages(q)
-  renderResults(items)
-})
