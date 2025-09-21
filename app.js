@@ -12,7 +12,7 @@ function saveTheme(t) { localStorage.setItem('theme-preference', t); } // BUG: k
 function loadTheme() { return localStorage.getItem('theme-preference') || 'light'; }
 function toggleTheme() { const next = (loadTheme() === 'light') ? 'dark' : 'light'; applyTheme(next); saveTheme(next); }
 
-// BUG: tuplalistener
+// Deleted double listener (BUG: tuplalistener)
 themeBtn.addEventListener('click', toggleTheme);
 
 applyTheme(loadTheme());
@@ -83,7 +83,7 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// 3) fixed conter area whole button
+// 4) fixed conter area whole button
 const counterBtn = $('.counter');
 counterBtn.addEventListener('click', (e) => {
   const span = $('.count', counterBtn);
