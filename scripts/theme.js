@@ -9,11 +9,13 @@ function applyTheme(theme) {
 }
 
 // save theme to localstorage
+// bug fix: now uses same key as loadTheme
 function saveTheme(theme) {
   localStorage.setItem(THEME_KEY, theme)
 }
 
 // load theme from localstorage
+// if nothing saved -> return light
 function loadTheme() {
   const saved = localStorage.getItem(THEME_KEY)
   if (saved) {
@@ -24,6 +26,7 @@ function loadTheme() {
 }
 
 // switch between light and dark
+// bug fix: only one event listener now
 function toggleTheme() {
   const current = loadTheme()
   if (current === 'light') {

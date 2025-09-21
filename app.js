@@ -1,4 +1,5 @@
 import './scripts/theme.js'
+import './scripts/search.js'
 
 // 0) Pieni apu
 const $ = (sel, root = document) => root.querySelector(sel);
@@ -7,71 +8,7 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 // "Moved to its own file"  1) Teema — virhe: localStorage avain sekoilee, event listener duplikoituu
 
 
-// 2) Haku — korjaus: oikea endpoint + AbortController + try/catch + lataustila
-const form = document.getElementById('searchForm');
-const resultsEl = document.getElementById('results');
-const statusEl = document.getElementById('status');
-
-// added abort controller
-let currentCtrl = null; // add nearby beginning of file
-
-// Coffee http-rajapinnan dokumentaatio: https://sampleapis.com/api-list/coffee
-async function searchImages(query) {
-  if (currentCtrl) currentCtrl.abort(); // cancel prev request
-  currentCtrl = new AbortController();
-  
-  // endpoint to one that returns an array of items with {title,image}
-  const url = `https://api.sampleapis.com/coffee/hot`; // returns list
-  try {
-    statusEl.textContent = 'Ladataan…'; //state to user
-    const res = await fetch(url, { signal: currentCtrl.signal }); //pass signal to abort controller
-    if (!res.ok) throw new Error(`HTTP ${res.status}`); //http error check
-
-    const raw = await res.json();
-    const list = Array.isArray(raw) ? raw : []; //quard
-    const q = (query || '').toLowerCase();
-    const filtered = q ? list.filter(x => x.title?.toLowerCase().includes(q)) : list;
-
-    //status with count
-    statusEl.textContent = `${filtered.length} tulosta`;
-    return filtered.slice(0, 12).map(x => ({
-      title: x.title || 'Nimetön',
-      url: x.image
-    }));
-  } catch (err) { // handling for cancellation
-    if (err.name === 'AbortError') {
-      statusEl.textContent = 'Peruutettu';
-      return [];
-    }
-    console.error(err);
-    statusEl.textContent = 'Haku epäonnistui.'; //show result instead of crash
-    return [];
-  } finally {
-    //clear controller handle
-    currentCtrl = null;
-  }
-}
-
-// try/catch, clear results first, call searchImages once
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  resultsEl.innerHTML = ''; // clear previous results 
-  const q = $('#q').value.trim();
-  try {
-    const items = await searchImages(q);
-    items.forEach(item => {
-      const li = document.createElement('li');
-      li.className = 'card';
-      li.innerHTML = `<strong>${item.title}</strong><br><img alt="" width="160" height="120" src="${item.url}">`;
-      resultsEl.appendChild(li);
-    });
-    // statusEl päivitetään searchImages-funktiossa
-  } catch (err) {
-    //last resort guard so that UI doesn't break
-    console.error(err);
-    statusEl.textContent = 'Tuntematon virhe haussa.';
-  }
-});
+// "Moved to its own file" 2) Haku — korjaus: oikea endpoint + AbortController + try/catch + lataustila
 
 // 4) fixed conter area whole button
 const counterBtn = $('.counter');
